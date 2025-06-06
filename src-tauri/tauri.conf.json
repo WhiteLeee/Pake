@@ -1,16 +1,27 @@
 {
-  "productName": "WeRead",
-  "identifier": "com.pake.weread",
-  "version": "1.0.0",
-  "app": {
-    "withGlobalTauri": true,
-    "trayIcon": {
-      "iconPath": "png/weread_512.png",
-      "iconAsTemplate": false,
-      "id": "pake-tray"
+    "productName": "YTAdminUAT",
+    "identifier": "com.pake.75f8c4",
+    "version": "1.0.0",
+    "app": {
+        "withGlobalTauri": true
+    },
+    "build": {
+        "frontendDist": "../dist"
+    },
+    "bundle": {
+        "icon": [
+            "/Users/wick/Desktop/ytadmin.icns"
+        ],
+        "active": true,
+        "macOS": {},
+        "targets": [
+            "dmg"
+        ],
+        "resources": [
+            "icons/ytadmin.icns",
+            "png/ytadmin.png",
+            "icons/ytadminuat.icns",
+            "png/ytadminuat.png"
+        ]
     }
-  },
-  "build": {
-    "frontendDist": "../dist"
-  }
 }

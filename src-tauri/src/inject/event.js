@@ -158,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // use addEventListener to avoid overriding the original click event.
       anchorEle.addEventListener(
         'click',
-        e => {
+        _e => {
           const url = anchorEle.href;
           const filename = anchorEle.download || getFilenameFromUrl(url);
           if (window.blobToUrlCaches.has(url)) {

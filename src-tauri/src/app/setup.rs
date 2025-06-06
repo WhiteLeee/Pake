@@ -5,11 +5,13 @@ use tauri::{
     menu::{MenuBuilder, MenuItemBuilder},
     tray::TrayIconBuilder,
     AppHandle, Manager,
+    image::Image,
 };
 use tauri_plugin_global_shortcut::{GlobalShortcutExt, Shortcut};
 use tauri_plugin_window_state::{AppHandleExt, StateFlags};
+use crate::app::config::PakeConfig;
 
-pub fn set_system_tray(app: &AppHandle, show_system_tray: bool) -> tauri::Result<()> {
+pub fn set_system_tray(app: &AppHandle, show_system_tray: bool, pake_config: &PakeConfig) -> tauri::Result<()> {
     if !show_system_tray {
         app.remove_tray_by_id("pake-tray");
         return Ok(());
@@ -24,6 +26,61 @@ pub fn set_system_tray(app: &AppHandle, show_system_tray: bool) -> tauri::Result
         .build()?;
 
     app.app_handle().remove_tray_by_id("pake-tray");
+
+    // 尝试加载自定义托盘图标
+    let icon = if !pake_config.system_tray_path.is_empty() {
+        // 在macOS上，优先尝试ICNS格式的图标
+        let icon_name = std::path::Path::new(&pake_config.system_tray_path)
+            .file_stem()
+            .unwrap()
+            .to_str()
+            .unwrap();
+        
+        let possible_icon_paths = vec![
+            format!("icons/{}.icns", icon_name),  // ICNS格式优先
+            pake_config.system_tray_path.clone(), // 原始路径
+        ];
+        
+        let mut loaded_icon = None;
+        for icon_path_str in possible_icon_paths {
+            let possible_paths = vec![
+                // 打包后的应用资源目录
+                app.path().resource_dir().ok().map(|p| p.join(&icon_path_str)),
+                // 开发环境的项目目录
+                app.path().app_local_data_dir().ok().map(|p| p.parent().unwrap().parent().unwrap().join(&icon_path_str)),
+            ];
+            
+            for path_opt in possible_paths {
+                if let Some(icon_path) = path_opt {
+                    if icon_path.exists() {
+                        match Image::from_path(&icon_path) {
+                            Ok(icon) => {
+                                println!("Successfully loaded system tray icon from: {}", icon_path.display());
+                                loaded_icon = Some(icon);
+                                break;
+                            }
+                            Err(e) => {
+                                eprintln!("Failed to load system tray icon from {}: {}", icon_path.display(), e);
+                            }
+                        }
+                    } else {
+                        eprintln!("System tray icon path does not exist: {}", icon_path.display());
+                    }
+                }
+            }
+            
+            if loaded_icon.is_some() {
+                break;
+            }
+        }
+        
+        loaded_icon.unwrap_or_else(|| {
+            eprintln!("Could not find system tray icon, using default");
+            app.default_window_icon().unwrap().clone()
+        })
+    } else {
+        app.default_window_icon().unwrap().clone()
+    };
 
     let tray = TrayIconBuilder::new()
         .menu(&menu)
@@ -44,7 +101,7 @@ pub fn set_system_tray(app: &AppHandle, show_system_tray: bool) -> tauri::Result
             }
             _ => (),
         })
-        .icon(app.default_window_icon().unwrap().clone())
+        .icon(icon)
         .build(app)?;
 
     tray.set_icon_as_template(false)?;

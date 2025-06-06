@@ -1,8 +1,18 @@
 {
-  "bundle": {
-    "icon": ["icons/weread.icns"],
-    "active": true,
-    "macOS": {},
-    "targets": ["dmg"]
-  }
+    "bundle": {
+        "icon": [
+            "/Users/wick/Desktop/ytadmin.icns"
+        ],
+        "active": true,
+        "macOS": {},
+        "targets": [
+            "dmg"
+        ],
+        "resources": [
+            "icons/ytadmin.icns",
+            "png/ytadmin.png",
+            "icons/ytadminuat.icns",
+            "png/ytadminuat.png"
+        ]
+    }
 }

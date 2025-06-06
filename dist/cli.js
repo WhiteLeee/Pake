@@ -20,7 +20,7 @@ import * as psl from 'psl';
 import isUrl from 'is-url';
 
 var name = "pake-cli";
-var version$1 = "3.1.1";
+var version$1 = "3.1.2.1";
 var description = "🤱🏻 Turn any webpage into a desktop app with Rust. 🤱🏻 利用 Rust 轻松构建轻量级多端桌面应用。";
 var engines = {
 	node: ">=16.0.0"
@@ -125,9 +125,9 @@ var packageJson = {
 
 var windows = [
 	{
-		url: "https://weread.qq.com",
+		url: "https://yt.yitongweb.com",
 		url_type: "web",
-		hide_title_bar: true,
+		hide_title_bar: false,
 		fullscreen: false,
 		width: 1200,
 		height: 780,
@@ -139,16 +139,16 @@ var windows = [
 	}
 ];
 var user_agent = {
-	macos: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15",
+	macos: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Chrome/108.0.0.0 Safari/605.1.15",
 	linux: "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36",
 	windows: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36"
 };
 var system_tray = {
-	macos: false,
+	macos: true,
 	linux: true,
 	windows: true
 };
-var system_tray_path = "icons/icon.png";
+var system_tray_path = "png/ytadmin.png";
 var inject = [
 ];
 var proxy_url = "";
@@ -161,36 +161,47 @@ var pakeConf = {
 	proxy_url: proxy_url
 };
 
-var productName$1 = "WeRead";
-var identifier = "com.pake.weread";
+var productName$1 = "YTAdmin";
+var identifier = "com.pake.8e6548";
 var version = "1.0.0";
 var app = {
-	withGlobalTauri: true,
-	trayIcon: {
-		iconPath: "png/weread_512.png",
-		iconAsTemplate: false,
-		id: "pake-tray"
-	}
+	withGlobalTauri: true
 };
 var build = {
 	frontendDist: "../dist"
+};
+var bundle$3 = {
+	icon: [
+		"/Users/wick/Desktop/ytadmin.icns"
+	],
+	active: true,
+	macOS: {
+	},
+	targets: [
+		"dmg"
+	],
+	resources: [
+		"icons/ytadmin.icns",
+		"png/ytadmin.png"
+	]
 };
 var CommonConf = {
 	productName: productName$1,
 	identifier: identifier,
 	version: version,
 	app: app,
-	build: build
+	build: build,
+	bundle: bundle$3
 };
 
 var bundle$2 = {
 	icon: [
-		"png/weread_256.ico",
-		"png/weread_32.ico"
+		"png/ytadmin_256.ico",
+		"png/ytadmin_32.ico"
 	],
 	active: true,
 	resources: [
-		"png/weread_32.ico"
+		"png/ytadmin_32.ico"
 	],
 	targets: [
 		"msi"
@@ -211,23 +222,27 @@ var WinConf = {
 
 var bundle$1 = {
 	icon: [
-		"icons/weread.icns"
+		"/Users/wick/Desktop/ytadmin.icns"
 	],
 	active: true,
 	macOS: {
 	},
 	targets: [
 		"dmg"
+	],
+	resources: [
+		"icons/ytadmin.icns",
+		"png/ytadmin.png"
 	]
 };
 var MacConf = {
 	bundle: bundle$1
 };
 
-var productName = "we-read";
+var productName = "YTAdmin";
 var bundle = {
 	icon: [
-		"png/weread_512.png"
+		"png/ytadmin_512.png"
 	],
 	active: true,
 	linux: {
@@ -237,7 +252,7 @@ var bundle = {
 				"wget"
 			],
 			files: {
-				"/usr/share/applications/com-pake-weread.desktop": "assets/com-pake-weread.desktop"
+				"/usr/share/applications/com-pake-ytadmin.desktop": "assets/com-pake-ytadmin.desktop"
 			}
 		}
 	},
@@ -527,7 +542,13 @@ async function mergeConfig(url, options, tauriConf) {
         }
         else {
             const iconPath = path.join(npmDirectory, 'src-tauri/', iconInfo.path);
-            tauriConf.bundle.resources = [iconInfo.path];
+            // 初始化 resources 数组（如果不存在）并添加应用图标
+            if (!tauriConf.bundle.resources) {
+                tauriConf.bundle.resources = [];
+            }
+            if (!tauriConf.bundle.resources.includes(iconInfo.path)) {
+                tauriConf.bundle.resources.push(iconInfo.path);
+            }
             await fsExtra.copy(options.icon, iconPath);
         }
         if (updateIconPath) {
@@ -565,6 +586,16 @@ async function mergeConfig(url, options, tauriConf) {
     }
     tauriConf.app.trayIcon.iconPath = trayIconPath;
     tauriConf.pake.system_tray_path = trayIconPath;
+    // 确保托盘图标也被添加到 resources 中
+    if (systemTrayIcon.length > 0 && trayIconPath !== 'png/icon_512.png') {
+        // 初始化 resources 数组（如果不存在）
+        if (!tauriConf.bundle.resources) {
+            tauriConf.bundle.resources = [];
+        }
+        if (!tauriConf.bundle.resources.includes(trayIconPath)) {
+            tauriConf.bundle.resources.push(trayIconPath);
+        }
+    }
     delete tauriConf.app.trayIcon;
     const injectFilePath = path.join(npmDirectory, `src-tauri/src/inject/custom.js`);
     // inject js or css files
@@ -778,7 +809,6 @@ const DEFAULT_PAKE_OPTIONS = {
     height: 780,
     width: 1200,
     fullscreen: false,
-    resizable: true,
     hideTitleBar: false,
     alwaysOnTop: false,
     appVersion: '1.0.0',
@@ -977,7 +1007,7 @@ program
     .option('--fullscreen', 'Start in full screen', DEFAULT_PAKE_OPTIONS.fullscreen)
     .option('--hide-title-bar', 'For Mac, hide title bar', DEFAULT_PAKE_OPTIONS.hideTitleBar)
     .option('--multi-arch', 'For Mac, both Intel and M1', DEFAULT_PAKE_OPTIONS.multiArch)
-    .option('--inject <url>', 'Injection of .js or .css files', DEFAULT_PAKE_OPTIONS.inject)
+    .option('--inject <url...>', 'Injection of .js or .css files', DEFAULT_PAKE_OPTIONS.inject)
     .option('--debug', 'Debug build and more output', DEFAULT_PAKE_OPTIONS.debug)
     .addOption(new Option('--proxy-url <url>', 'Proxy URL for all network requests').default(DEFAULT_PAKE_OPTIONS.proxyUrl).hideHelp())
     .addOption(new Option('--user-agent <string>', 'Custom user agent').default(DEFAULT_PAKE_OPTIONS.userAgent).hideHelp())

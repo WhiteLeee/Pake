@@ -1,12 +1,12 @@
 {
-  "productName": "we-read",
+  "productName": "YTAdmin",
   "bundle": {
-    "icon": ["png/weread_512.png"],
+    "icon": ["png/ytadmin_512.png"],
     "active": true,
     "linux": {
       "deb": {
         "depends": ["curl", "wget"],
-        "files": { "/usr/share/applications/com-pake-weread.desktop": "assets/com-pake-weread.desktop" }
+        "files": { "/usr/share/applications/com-pake-ytadmin.desktop": "assets/com-pake-ytadmin.desktop" }
       }
     },
     "targets": ["deb", "appimage"]

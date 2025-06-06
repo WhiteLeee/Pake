@@ -82,6 +82,8 @@ pub async fn download_file_by_binary(
 #[command]
 pub fn send_notification(app: AppHandle, params: NotificationParams) -> Result<(), String> {
     use tauri_plugin_notification::NotificationExt;
+    
+    // 发送通知
     app.notification()
         .builder()
         .title(&params.title)
@@ -89,5 +91,27 @@ pub fn send_notification(app: AppHandle, params: NotificationParams) -> Result<(
         .icon(&params.icon)
         .show()
         .unwrap();
+    
+    // 请求用户注意力，让系统托盘图标跳动
+    if let Some(window) = app.get_webview_window("pake") {
+        #[cfg(target_os = "macos")]
+        {
+            use tauri::UserAttentionType;
+            let _ = window.request_user_attention(Some(UserAttentionType::Informational));
+        }
+        
+        #[cfg(target_os = "windows")]
+        {
+            use tauri::UserAttentionType;
+            let _ = window.request_user_attention(Some(UserAttentionType::Informational));
+        }
+        
+        #[cfg(target_os = "linux")]
+        {
+            use tauri::UserAttentionType;
+            let _ = window.request_user_attention(Some(UserAttentionType::Informational));
+        }
+    }
+    
     Ok(())
 }

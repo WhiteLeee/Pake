@@ -142,7 +142,13 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
       tauriConf.bundle.icon = [iconInfo.defaultIcon];
     } else {
       const iconPath = path.join(npmDirectory, 'src-tauri/', iconInfo.path);
-      tauriConf.bundle.resources = [iconInfo.path];
+      // 初始化 resources 数组（如果不存在）并添加应用图标
+      if (!tauriConf.bundle.resources) {
+        tauriConf.bundle.resources = [];
+      }
+      if (!tauriConf.bundle.resources.includes(iconInfo.path)) {
+        tauriConf.bundle.resources.push(iconInfo.path);
+      }
       await fsExtra.copy(options.icon, iconPath);
     }
 
@@ -179,6 +185,17 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
 
   tauriConf.app.trayIcon.iconPath = trayIconPath;
   tauriConf.pake.system_tray_path = trayIconPath;
+
+  // 确保托盘图标也被添加到 resources 中
+  if (systemTrayIcon.length > 0 && trayIconPath !== 'png/icon_512.png') {
+    // 初始化 resources 数组（如果不存在）
+    if (!tauriConf.bundle.resources) {
+      tauriConf.bundle.resources = [];
+    }
+    if (!tauriConf.bundle.resources.includes(trayIconPath)) {
+      tauriConf.bundle.resources.push(trayIconPath);
+    }
+  }
 
   delete tauriConf.app.trayIcon;
 
