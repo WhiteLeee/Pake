@@ -125,7 +125,7 @@ var packageJson = {
 
 var windows = [
 	{
-		url: "https://yt.yitongweb.com",
+		url: "http://8.148.20.11:18080/",
 		url_type: "web",
 		hide_title_bar: false,
 		fullscreen: false,
@@ -148,7 +148,7 @@ var system_tray = {
 	linux: true,
 	windows: true
 };
-var system_tray_path = "png/ytadmin.png";
+var system_tray_path = "png/ytadminuat.png";
 var inject = [
 ];
 var proxy_url = "";
@@ -161,8 +161,8 @@ var pakeConf = {
 	proxy_url: proxy_url
 };
 
-var productName$1 = "YTAdmin";
-var identifier = "com.pake.8e6548";
+var productName$1 = "YTAdminUAT";
+var identifier = "com.pake.75f8c4";
 var version = "1.0.0";
 var app = {
 	withGlobalTauri: true
@@ -182,7 +182,9 @@ var bundle$3 = {
 	],
 	resources: [
 		"icons/ytadmin.icns",
-		"png/ytadmin.png"
+		"png/ytadmin.png",
+		"icons/ytadminuat.icns",
+		"png/ytadminuat.png"
 	]
 };
 var CommonConf = {
@@ -232,7 +234,9 @@ var bundle$1 = {
 	],
 	resources: [
 		"icons/ytadmin.icns",
-		"png/ytadmin.png"
+		"png/ytadmin.png",
+		"icons/ytadminuat.icns",
+		"png/ytadminuat.png"
 	]
 };
 var MacConf = {

@@ -35,12 +35,18 @@ pub fn run_app() {
 
     #[allow(deprecated)]
     tauri_app
+        .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
+            // 当尝试启动新实例时，聚焦到现有窗口
+            if let Some(window) = app.get_webview_window("main") {
+                let _ = window.set_focus();
+                let _ = window.unminimize();
+            }
+        }))
         .plugin(window_state_plugin)
         .plugin(tauri_plugin_oauth::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_notification::init())
-        .plugin(tauri_plugin_single_instance::init(|_, _, _| ()))
         .invoke_handler(tauri::generate_handler![
             download_file,
             download_file_by_binary,

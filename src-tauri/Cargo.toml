@@ -27,7 +27,7 @@ tauri-plugin-oauth = "2.0.0"
 tauri-plugin-http = "2.2.0"
 tauri-plugin-global-shortcut = { version = "2.2.0" }
 tauri-plugin-shell = "2.2.0"
-tauri-plugin-single-instance = "2.2.0"
+tauri-plugin-single-instance = "2.2.4"
 tauri-plugin-notification = "2.2.0"
 
 [features]
