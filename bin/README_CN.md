@@ -1,4 +1,4 @@
-<h4 align="right"><strong><a href="https://github.com/tw93/Pake/tree/main/bin">English</a></strong> | 简体中文</h4>
+<h4 align="right"><strong>简体中文</h4>
 
 ## 安装
 
@@ -277,20 +277,3 @@ npm run cli:dev
 ```
 
 脚本会读取上述配置并使用 `watch` 模式打包指定的 `app`，对 `pake-cli` 代码和 `pake` 的修改都会实时热更新。
-
-## Docker 使用
-
-```shell
-# 在Linux上，您可以通过 Docker 运行 Pake CLI。
-docker run -it --rm \ # Run interactively, remove container after exit
-    -v YOUR_DIR:/output \ # Files from container's /output will be in YOU_DIR
-    ghcr.io/tw93/pake \
-    <arguments>
-
-# For example:
-docker run -it --rm \
-    -v ./packages:/output \
-    ghcr.io/tw93/pake \
-    https://example.com --name myapp --icon ./icon.png
-
-```

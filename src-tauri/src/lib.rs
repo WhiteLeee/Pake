@@ -10,7 +10,7 @@ use tauri_plugin_window_state::StateFlags;
 use std::time::Duration;
 
 use app::{
-    invoke::{download_file, download_file_by_binary, send_notification},
+    invoke::{download_file, download_file_by_binary, send_notification, get_logs, clear_logs},
     setup::{set_global_shortcut, set_system_tray},
     window::set_window,
 };
@@ -51,13 +51,26 @@ pub fn run_app() {
             download_file,
             download_file_by_binary,
             send_notification,
+            get_logs,
+            clear_logs,
         ])
         .setup(move |app| {
+            // 添加应用启动日志
+            app::invoke::add_log_entry("INFO", "应用正在启动...");
+            
             let window = set_window(app, &pake_config, &tauri_config);
+            app::invoke::add_log_entry("INFO", "窗口设置完成");
+            
             set_system_tray(app.app_handle(), show_system_tray, &pake_config).unwrap();
+            app::invoke::add_log_entry("INFO", "系统托盘设置完成");
+            
             set_global_shortcut(app.app_handle(), activation_shortcut).unwrap();
+            app::invoke::add_log_entry("INFO", "全局快捷键设置完成");
+            
             // Prevent flickering on the first open.
             window.show().unwrap();
+            app::invoke::add_log_entry("INFO", "应用启动完成，窗口已显示");
+            
             Ok(())
         })
         .on_window_event(|_window, _event| {

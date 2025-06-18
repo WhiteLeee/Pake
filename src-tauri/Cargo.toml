@@ -1,11 +1,11 @@
 [package]
 name = "pake"
-version = "3.1.0"
+version = "3.1.2.2"
 description = "🤱🏻 Turn any webpage into a desktop app with Rust."
-authors = ["Tw93"]
+authors = ["Wick"]
 license = "MIT"
-repository = "https://github.com/tw93/Pake"
-edition = "2021"
+repository = "https://github.com/WhiteLeee/Pake"
+edition = "2025"
 rust-version = "1.78.0"
 
 [lib]
@@ -29,6 +29,8 @@ tauri-plugin-global-shortcut = { version = "2.2.0" }
 tauri-plugin-shell = "2.2.0"
 tauri-plugin-single-instance = "2.2.4"
 tauri-plugin-notification = "2.2.0"
+chrono = { version = "0.4", features = ["serde"] }
+once_cell = "1.19"
 
 [features]
 # this feature is used for development builds from development cli

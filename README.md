@@ -1,487 +1,186 @@
-<h4 align="right"><strong>English</strong> | <a href="https://github.com/tw93/Pake/blob/main/README_CN.md">简体中文</a> | <a href="https://github.com/tw93/Pake/blob/main/README_JP.md">日本語</a></h4>
-<p align="center">
-    <img src=https://gw.alipayobjects.com/zos/k/fa/logo-modified.png width=138/>
-</p>
-<h1 align="center">Pake</h1>
-<p align="center"><strong>Turn any webpage into a desktop app with Rust <em>with ease</em>.</strong></p>
-<div align="center">
-    <a href="https://twitter.com/HiTw93" target="_blank">
-    <img alt="twitter" src="https://img.shields.io/badge/follow-Tw93-red?style=flat-square&logo=Twitter"></a>
-    <a href="https://t.me/+GclQS9ZnxyI2ODQ1" target="_blank">
-    <img alt="telegram" src="https://img.shields.io/badge/chat-telegram-blueviolet?style=flat-square&logo=Telegram"></a>
-    <a href="https://github.com/tw93/Pake/releases" target="_blank">
-    <img alt="GitHub downloads" src="https://img.shields.io/github/downloads/tw93/Pake/total.svg?style=flat-square"></a>
-    <a href="https://github.com/tw93/Pake/commits" target="_blank">
-    <img alt="GitHub commit" src="https://img.shields.io/github/commit-activity/m/tw93/Pake?style=flat-square"></a>
-    <a href="https://github.com/tw93/Pake/issues?q=is%3Aissue+is%3Aclosed" target="_blank">
-    <img alt="GitHub closed issues" src="https://img.shields.io/github/issues-closed/tw93/Pake.svg?style=flat-square"></a>
-    <a href="https://colab.research.google.com/drive/1bX345znvDZ30848xjRtpgtU8eypWwXrp?usp=sharing" target="_blank">
-    <img alt="Open in Colab" src="https://colab.research.google.com/assets/colab-badge.svg"></a>
-</div>
+<p align="center"><strong>基于 Tauri 框架，将任何网页转换为轻量级桌面应用</strong></p>
 
-<div align="left">Pake supports Mac, Windows, and Linux. Check out README for <a href="#popular-packages">Popular Packages</a>, <a href="#command-line-packaging">Command-Line Packaging</a>, and <a href="#development">Customized Development</a> information. Feel free to share your suggestions in <a href=https://github.com/tw93/Pake/discussions>Discussions</a>.</div>
+## 核心特性
 
-## Features
+- **轻量级** - 相比 Electron 应用体积减少 20 倍，仅 5MB 左右
+- **高性能** - 基于 Rust Tauri 框架，内存占用更少，运行更流畅
+- **功能丰富** - 支持快捷键透传、沉浸式窗口、样式定制、系统托盘等
+- **跨平台** - 支持 macOS、Windows、Linux 三大平台
 
-- 🎐 Nearly 20 times smaller than an Electron package (around 5M!)
-- 🚀 With Rust Tauri, Pake is much more lightweight and faster than JS-based frameworks.
-- 📦 Battery-included package — shortcut pass-through, immersive windows, and minimalist customization.
-- 👻 Pake is just a simple tool — replace the old bundle approach with Tauri (though PWA is good enough).
+## 快速开始
 
-## Popular Packages
+更多预构建应用可在 [Release](https://github.com/tw93/Pake/releases) 页面下载。
 
-<table>
-    <tr>
-        <td>WeRead
-            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/WeRead_x86_64.deb">Linux</a>
-        </td>
-        <td>Twitter
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Twitter_x86_64.deb">Linux</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/WeRead.jpg width=600/></td>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Twitter.jpg width=600/></td>
-    </tr>
-     <tr>
-        <td>Grok
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Grok.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Grok_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Grok_x86_64.deb">Linux</a>
-        </td>
-        <td>DeepSeek
-            <a href="https://github.com/tw93/Pake/releases/latest/download/DeepSeek.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/DeepSeek_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/DeepSeek_x86_64.deb">Linux</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Grok.png width=600/></td>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/DeepSeek.png width=600/></td>
-    </tr>
-    <tr>
-        <td>ChatGPT
-            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/ChatGPT_x86_64.deb">Linux</a>
-        </td>
-        <td>Gemini
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Gemini.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Gemini_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Gemini_x86_64.deb">Linux</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/ChatGPT.png width=600/></td>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Gemini.png width=600/></td>
-    </tr>
-    <tr>
-      <td>YouTube Music
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTubeMusic.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTubeMusic_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTubeMusic_x86_64.deb">Linux</a>
-      </td>
-      <td>YouTube
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/YouTube_x86_64.deb">Linux</a>
-      </td>
-    </tr>
-    <tr>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/YouTubeMusic.png width=600 /></td>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/YouTube.jpg width=600 /></td>
-    </tr>
-    <tr>
-        <td>LiZhi
-            <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/LiZhi_x86_64.deb">Linux</a>
-        </td>
-        <td>ProgramMusic
-            <a href="https://github.com/tw93/Pake/releases/latest/download/ProgramMusic.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/ProgramMusic_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/ProgramMusic_x86_64.deb">Linux</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/LiZhi.jpg width=600/></td>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/ProgramMusic.jpg width=600/></td>
-    </tr>
-    <tr>
-         <td>Excalidraw
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Excalidraw.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Excalidraw_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/Excalidraw_x86_64.deb">Linux</a>
-        </td>
-        <td>XiaoHongShu
-            <a href="https://github.com/tw93/Pake/releases/latest/download/XiaoHongShu.dmg">Mac</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/XiaoHongShu_x64.msi">Windows</a>
-            <a href="https://github.com/tw93/Pake/releases/latest/download/XiaoHongShu_x86_64.deb">Linux</a>
-        </td>
-    </tr>
-    <tr>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/Excalidraw.png width=600/></td>
-        <td><img src=https://raw.githubusercontent.com/tw93/static/main/pake/XiaoHongShu.png width=600/></td>
-    </tr>
-</table>
+### 使用方式
 
-<details>
-<summary>🏂 You can download more applications from <a href="https://github.com/tw93/Pake/releases">Releases</a>. <b>Click here to expand the shortcuts reference!</b></summary>
+1. **直接下载**：从 [Release](https://github.com/tw93/Pake/releases) 页面下载预构建应用
+2. **命令行打包**：使用 CLI 工具自定义打包
+3. **源码构建**：克隆项目进行定制开发
 
-<br/>
-
-| Mac                         | Windows/Linux                  | Function                      |
-| --------------------------- | ------------------------------ | ----------------------------- |
-| <kbd>⌘</kbd> + <kbd>[</kbd> | <kbd>Ctrl</kbd> + <kbd>←</kbd> | Return to the previous page   |
-| <kbd>⌘</kbd> + <kbd>]</kbd> | <kbd>Ctrl</kbd> + <kbd>→</kbd> | Go to the next page           |
-| <kbd>⌘</kbd> + <kbd>↑</kbd> | <kbd>Ctrl</kbd> + <kbd>↑</kbd> | Auto scroll to top of page    |
-| <kbd>⌘</kbd> + <kbd>↓</kbd> | <kbd>Ctrl</kbd> + <kbd>↓</kbd> | Auto scroll to bottom of page |
-| <kbd>⌘</kbd> + <kbd>r</kbd> | <kbd>Ctrl</kbd> + <kbd>r</kbd> | Refresh Page                  |
-| <kbd>⌘</kbd> + <kbd>w</kbd> | <kbd>Ctrl</kbd> + <kbd>w</kbd> | Hide window, not quite        |
-| <kbd>⌘</kbd> + <kbd>-</kbd> | <kbd>Ctrl</kbd> + <kbd>-</kbd> | Zoom out the page             |
-| <kbd>⌘</kbd> + <kbd>+</kbd> | <kbd>Ctrl</kbd> + <kbd>+</kbd> | Zoom in the page              |
-| <kbd>⌘</kbd> + <kbd>=</kbd> | <kbd>Ctrl</kbd> + <kbd>=</kbd> | Zoom in the Page              |
-| <kbd>⌘</kbd> + <kbd>0</kbd> | <kbd>Ctrl</kbd> + <kbd>0</kbd> | Reset the page zoom           |
-
-In addition, double-click the title bar to switch to full-screen mode. For Mac users, you can also use the gesture to go to the previous or next page and drag the title bar to move the window.
-
-</details>
-
-## Before starting
-
-1. **For beginners**: Play with Popular Packages to find out Pake's capabilities, or try to pack your application with [GitHub Actions](<https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)>). Don't hesitate to reach for assistance at [Discussion](https://github.com/tw93/Pake/discussions)!
-2. **For developers**: “Command-Line Packaging” supports macOS fully. For Windows/Linux users, it requires some tinkering. [Configure your environment](https://tauri.app/start/prerequisites/) before getting started.
-3. **For hackers**: For people who are good at both front-end development and Rust, how about customizing your apps' function more with the following [Customized Development](#development)?
-
-## Command-Line Packaging
-
-![Pake](https://raw.githubusercontent.com/tw93/static/main/pake/pake.gif)
-
-**Pake provides a command line tool, making the flow of package customization quicker and easier. See [documentation](./bin/README.md) for more information.**
+## 命令行打包
 
 ```bash
-# Install with npm
+# 安装 CLI 工具
 npm install -g pake-cli
 
-# Command usage
-pake url [OPTIONS]...
+# 打包网页为桌面应用
+pake <url> [选项]
 
-# Feel free to play with Pake! It might take a while to prepare the environment the first time you launch Pake.
+# 示例
 pake https://weekly.tw93.fun --name Weekly --hide-title-bar
-
 ```
 
-If you are new to the command line, you can compile packages online with _GitHub Actions_. See the [Tutorial](<https://github.com/tw93/Pake/wiki/Online-Compilation-(used-by-ordinary-users)>) for more information.
+## 源码构建
 
-## Development
+**环境要求**：Rust >=1.63、Node >=16
 
-Prepare your environment before starting. Make sure you have Rust `>=1.63` and Node `>=16` (e.g., `16.18.1`) installed on your computer. For installation guidance, see [Tauri documentation](https://tauri.app/start/prerequisites/).
+```bash
+# 安装依赖
+npm install
 
-If you are unfamiliar with these, it is better to try out the above tool to pack with one click.
-
-```sh
-# Install Dependencies
-npm i
-
-# Local development [Right-click to open debug mode.]
+# 本地开发
 npm run dev
 
-# Pack application
+# 构建应用
 npm run build
 ```
 
-## Advanced Usage
+## 配置说明
 
-1. You can refer to the [codebase structure](https://github.com/tw93/Pake/wiki/Description-of-Pake's-code-structure) before working on Pake, which will help you much in development.
-2. Modify the `url` and `productName` fields in the `pake.json` file under the src-tauri directory, the "domain" field in the `tauri.config.json` file needs to be modified synchronously, as well as the `icon` and `identifier` fields in the `tauri.xxx.conf.json` file. You can select an `icon` from the `icons` directory or download one from [macOSicons](https://macosicons.com/#/) to match your product needs.
-3. For configurations on window properties, you can modify the `pake.json` file to change the value of `width`, `height`, `fullscreen` (or not), `resizable` (or not) of the `windows` property. To adapt to the immersive header on Mac, change `hideTitleBar` to `true`, look for the `Header` element, and add the `padding-top` property.
-4. For advanced usages such as style rewriting, advertisement removal, JS injection, container message communication, and user-defined shortcut keys, see [Advanced Usage of Pake](https://github.com/tw93/Pake/wiki/Advanced-Usage-of-Pake).
+### pake.json 配置参数
 
-## Developers
+**基础窗口配置**：
+- `url`: 目标网页地址或本地文件路径 
+  - 示例：`"https://github.com"` 或 `"./index.html"`
+- `url_type`: URL类型，`"web"` 表示网页，`"local"` 表示本地文件
+  - 示例：`"web"` 或 `"local"`
+- `width`: 窗口宽度，默认 1200px
+  - 示例：`1400`
+- `height`: 窗口高度，默认 780px
+  - 示例：`900`
+- `resizable`: 是否可调整窗口大小，默认 true
+  - 示例：`false`（固定窗口大小）
+- `fullscreen`: 是否全屏显示，默认 false
+  - 示例：`true`（启动时全屏）
+- `hide_title_bar`: 是否隐藏标题栏（沉浸式），默认 false
+  - 示例：`true`（无边框窗口）
+- `always_on_top`: 是否窗口置顶，默认 false
+  - 示例：`true`（窗口始终在最前）
+- `dark_mode`: 是否强制深色模式（仅 macOS），默认 false
+  - 示例：`true`（强制深色主题）
 
-Pake's development can not be without these Hackers. They contributed a lot of capabilities for Pake. Also, welcome to follow them! ❤️
+**交互配置**：
+- `activation_shortcut`: 唤醒应用的快捷键，默认为空
+  - 示例：`"CmdOrCtrl+Shift+P"`（Cmd/Ctrl+Shift+P 唤醒）
+- `disabled_web_shortcuts`: 是否禁用网页快捷键，默认 false
+  - 示例：`true`（禁用 F12、Ctrl+U 等）
 
-<!-- readme: contributors -start -->
-<table>
-<tr>
-    <td align="center">
-        <a href="https://github.com/tw93">
-            <img src="https://avatars.githubusercontent.com/u/8736212?v=4" width="90;" alt="tw93"/>
-            <br />
-            <sub><b>Tw93</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/Tlntin">
-            <img src="https://avatars.githubusercontent.com/u/28218658?v=4" width="90;" alt="Tlntin"/>
-            <br />
-            <sub><b>Tlntin</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/jeasonnow">
-            <img src="https://avatars.githubusercontent.com/u/16950207?v=4" width="90;" alt="jeasonnow"/>
-            <br />
-            <sub><b>Santree</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/pan93412">
-            <img src="https://avatars.githubusercontent.com/u/28441561?v=4" width="90;" alt="pan93412"/>
-            <br />
-            <sub><b>Pan93412</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/stone-w4tch3r">
-            <img src="https://avatars.githubusercontent.com/u/100294019?v=4" width="90;" alt="stone-w4tch3r"/>
-            <br />
-            <sub><b>Данил Бизимов</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/wanghanzhen">
-            <img src="https://avatars.githubusercontent.com/u/25301012?v=4" width="90;" alt="wanghanzhen"/>
-            <br />
-            <sub><b>Volare</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/liby">
-            <img src="https://avatars.githubusercontent.com/u/38807139?v=4" width="90;" alt="liby"/>
-            <br />
-            <sub><b>Bryan Lee</b></sub>
-        </a>
-    </td></tr>
-<tr>
-    <td align="center">
-        <a href="https://github.com/essesoul">
-            <img src="https://avatars.githubusercontent.com/u/58624474?v=4" width="90;" alt="essesoul"/>
-            <br />
-            <sub><b>Essesoul</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/YangguangZhou">
-            <img src="https://avatars.githubusercontent.com/u/61733195?v=4" width="90;" alt="YangguangZhou"/>
-            <br />
-            <sub><b>Jerry Zhou</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/AielloChan">
-            <img src="https://avatars.githubusercontent.com/u/7900765?v=4" width="90;" alt="AielloChan"/>
-            <br />
-            <sub><b>Aiello</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/m1911star">
-            <img src="https://avatars.githubusercontent.com/u/4948120?v=4" width="90;" alt="m1911star"/>
-            <br />
-            <sub><b>Horus</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/Pake-Actions">
-            <img src="https://avatars.githubusercontent.com/u/126550811?v=4" width="90;" alt="Pake-Actions"/>
-            <br />
-            <sub><b>Pake Actions</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/GoodbyeNJN">
-            <img src="https://avatars.githubusercontent.com/u/6856639?v=4" width="90;" alt="GoodbyeNJN"/>
-            <br />
-            <sub><b>GoodbyeNJN</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/eltociear">
-            <img src="https://avatars.githubusercontent.com/u/22633385?v=4" width="90;" alt="eltociear"/>
-            <br />
-            <sub><b>Ikko Eltociear Ashimine</b></sub>
-        </a>
-    </td></tr>
-<tr>
-    <td align="center">
-        <a href="https://github.com/mattbajorek">
-            <img src="https://avatars.githubusercontent.com/u/17235301?v=4" width="90;" alt="mattbajorek"/>
-            <br />
-            <sub><b>Matt Bajorek</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/QingZ11">
-            <img src="https://avatars.githubusercontent.com/u/38887077?v=4" width="90;" alt="QingZ11"/>
-            <br />
-            <sub><b>Steam</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/Tianj0o">
-            <img src="https://avatars.githubusercontent.com/u/68584284?v=4" width="90;" alt="Tianj0o"/>
-            <br />
-            <sub><b>Qitianjia</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/xinyii">
-            <img src="https://avatars.githubusercontent.com/u/17895104?v=4" width="90;" alt="xinyii"/>
-            <br />
-            <sub><b>Yi Xin</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/exposir">
-            <img src="https://avatars.githubusercontent.com/u/33340988?v=4" width="90;" alt="exposir"/>
-            <br />
-            <sub><b>孟世博</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/2nthony">
-            <img src="https://avatars.githubusercontent.com/u/19513289?v=4" width="90;" alt="2nthony"/>
-            <br />
-            <sub><b>2nthony</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/ACGNnsj">
-            <img src="https://avatars.githubusercontent.com/u/22112141?v=4" width="90;" alt="ACGNnsj"/>
-            <br />
-            <sub><b>Null</b></sub>
-        </a>
-    </td></tr>
-<tr>
-    <td align="center">
-        <a href="https://github.com/imabutahersiddik">
-            <img src="https://avatars.githubusercontent.com/u/138387257?v=4" width="90;" alt="imabutahersiddik"/>
-            <br />
-            <sub><b>Abu Taher Siddik</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/kidylee">
-            <img src="https://avatars.githubusercontent.com/u/841310?v=4" width="90;" alt="kidylee"/>
-            <br />
-            <sub><b>An Li</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/nekomeowww">
-            <img src="https://avatars.githubusercontent.com/u/11081491?v=4" width="90;" alt="nekomeowww"/>
-            <br />
-            <sub><b>Ayaka Neko</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/turkyden">
-            <img src="https://avatars.githubusercontent.com/u/24560160?v=4" width="90;" alt="turkyden"/>
-            <br />
-            <sub><b>Dengju Deng</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/Fechin">
-            <img src="https://avatars.githubusercontent.com/u/2541482?v=4" width="90;" alt="Fechin"/>
-            <br />
-            <sub><b>Fechin</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/ImgBotApp">
-            <img src="https://avatars.githubusercontent.com/u/31427850?v=4" width="90;" alt="ImgBotApp"/>
-            <br />
-            <sub><b>Imgbot</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/droid-Q">
-            <img src="https://avatars.githubusercontent.com/u/708277?v=4" width="90;" alt="droid-Q"/>
-            <br />
-            <sub><b>Jiaqi Gu</b></sub>
-        </a>
-    </td></tr>
-<tr>
-    <td align="center">
-        <a href="https://github.com/Milo123459">
-            <img src="https://avatars.githubusercontent.com/u/50248166?v=4" width="90;" alt="Milo123459"/>
-            <br />
-            <sub><b>Milo</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/princemaple">
-            <img src="https://avatars.githubusercontent.com/u/1329716?v=4" width="90;" alt="princemaple"/>
-            <br />
-            <sub><b>Po Chen</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/geekvest">
-            <img src="https://avatars.githubusercontent.com/u/126322776?v=4" width="90;" alt="geekvest"/>
-            <br />
-            <sub><b>Null</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/houhoz">
-            <img src="https://avatars.githubusercontent.com/u/19684376?v=4" width="90;" alt="houhoz"/>
-            <br />
-            <sub><b>Hyzhao</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/lakca">
-            <img src="https://avatars.githubusercontent.com/u/16255922?v=4" width="90;" alt="lakca"/>
-            <br />
-            <sub><b>Null</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/liudonghua123">
-            <img src="https://avatars.githubusercontent.com/u/2276718?v=4" width="90;" alt="liudonghua123"/>
-            <br />
-            <sub><b>Liudonghua</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/liusishan">
-            <img src="https://avatars.githubusercontent.com/u/33129823?v=4" width="90;" alt="liusishan"/>
-            <br />
-            <sub><b>Liusishan</b></sub>
-        </a>
-    </td></tr>
-<tr>
-    <td align="center">
-        <a href="https://github.com/piaoyidage">
-            <img src="https://avatars.githubusercontent.com/u/5135405?v=4" width="90;" alt="piaoyidage"/>
-            <br />
-            <sub><b>Ranger</b></sub>
-        </a>
-    </td>
-    <td align="center">
-        <a href="https://github.com/hetz">
-            <img src="https://avatars.githubusercontent.com/u/820141?v=4" width="90;" alt="hetz"/>
-            <br />
-            <sub><b>贺天卓</b></sub>
-        </a>
-    </td></tr>
-</table>
-<!-- readme: contributors -end -->
+**系统托盘配置**：
+- `system_tray`: 各平台是否启用系统托盘
+  - `macos`: macOS 系统托盘，默认 true
+    - 示例：`false`（macOS 不显示托盘）
+  - `linux`: Linux 系统托盘，默认 true  
+    - 示例：`true`（Linux 显示托盘）
+  - `windows`: Windows 系统托盘，默认 true
+    - 示例：`true`（Windows 显示托盘）
+- `system_tray_path`: 托盘图标路径
+  - 示例：`"png/custom_tray.png"`
 
-## Frequently Asked Questions
+**高级配置**：
+- `user_agent`: 自定义浏览器标识
+  - `macos`: macOS 平台 User-Agent
+    - 示例：`"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15"`
+  - `linux`: Linux 平台 User-Agent
+    - 示例：`"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36"`
+  - `windows`: Windows 平台 User-Agent
+    - 示例：`"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"`
+- `inject`: 注入的 JavaScript 文件列表
+  - 示例：`["scripts/custom.js", "scripts/theme.js"]`
+- `proxy_url`: 代理服务器地址
+  - 示例：`"http://127.0.0.1:8080"`
 
-1. Right-clicking on an image element in the page to open the menu and select download image or other events does not work (common in MacOS systems). This issue is due to the MacOS built-in webview not supporting this feature.
+### tauri.conf.json 配置参数
 
-## Support
+**应用信息**：
+- `productName`: 应用产品名称
+  - 示例：`"GitHub Desktop"`
+- `identifier`: 应用唯一标识符（如 com.pake.xxx）
+  - 示例：`"com.github.desktop"`
+- `version`: 应用版本号
+  - 示例：`"1.2.3"`
 
-1. I have two cats, TangYuan and Coke. If you think Pake delights your life, you can feed them <a href="https://miaoyan.app/cats.html?name=Pake" target="_blank">some canned food 🥩</a>.
-2. If you like Pake, you can star it on GitHub. Also, welcome to [recommend Pake](https://twitter.com/intent/tweet?url=https://github.com/tw93/Pake&text=%23Pake%20-%20A%20simple%20Rust%20packaged%20web%20pages%20to%20generate%20Mac%20App%20tool,%20compared%20to%20traditional%20Electron%20package,%20the%20size%20of%20nearly%2040%20times%20smaller,%20generally%20about%202M,%20the%20underlying%20use%20of%20Tauri,%20performance%20experience%20than%20the%20JS%20framework%20is%20much%20lighter~) to your friends.
-3. You can follow my [Twitter](https://twitter.com/HiTw93) to get the latest news of Pake or join our [Telegram](https://t.me/+GclQS9ZnxyI2ODQ1) chat group.
-4. I hope that you enjoy playing with it. Let us know if you find a website that would be great for a Mac App!
+**打包配置**：
+- `bundle.icon`: 应用图标文件路径列表
+  - 示例：`["/path/to/app.icns", "/path/to/app.ico"]`
+- `bundle.targets`: 打包目标格式（如 dmg、deb、appimage）
+  - 示例：`["dmg"]`（macOS）或 `["deb", "appimage"]`（Linux）
+- `bundle.resources`: 打包时包含的资源文件
+  - 示例：`["icons/*.png", "assets/*"]`
+
+### CLI 命令行参数
+
+**基础参数**：
+- `--name`: 应用名称
+  - 示例：`--name "My App"`
+- `--icon`: 应用图标路径
+  - 示例：`--icon ./assets/icon.png`
+- `--width`: 窗口宽度（默认 1200）
+  - 示例：`--width 1400`
+- `--height`: 窗口高度（默认 780）
+  - 示例：`--height 900`
+- `--app-version`: 应用版本（默认 1.0.0）
+  - 示例：`--app-version 2.1.0`
+
+**窗口行为**：
+- `--resizable`: 窗口可调整大小（默认启用）
+  - 示例：`--resizable false`（固定窗口大小）
+- `--fullscreen`: 全屏模式
+  - 示例：`--fullscreen`（启动时全屏）
+- `--hide-title-bar`: 隐藏标题栏
+  - 示例：`--hide-title-bar`（无边框窗口）
+- `--always-on-top`: 窗口置顶
+  - 示例：`--always-on-top`（窗口始终在最前）
+- `--dark-mode`: 强制深色模式（仅 macOS）
+  - 示例：`--dark-mode`（强制深色主题）
+
+**功能开关**：
+- `--disabled-web-shortcuts`: 禁用网页快捷键
+  - 示例：`--disabled-web-shortcuts`（禁用 F12、Ctrl+U 等）
+- `--show-system-tray`: 启用系统托盘
+  - 示例：`--show-system-tray`
+- `--multi-arch`: 多架构支持（仅 macOS，支持 Intel 和 M1）
+  - 示例：`--multi-arch`（同时支持 Intel 和 M1 芯片）
+- `--use-local-file`: 递归复制本地文件
+  - 示例：`--use-local-file`（复制本地文件夹）
+- `--debug`: 调试模式
+  - 示例：`--debug`（输出详细日志）
+
+**高级配置**：
+- `--activation-shortcut`: 唤醒快捷键
+  - 示例：`--activation-shortcut "CmdOrCtrl+Shift+P"`
+- `--user-agent`: 自定义 User-Agent
+  - 示例：`--user-agent "Custom Browser 1.0"`
+- `--system-tray-icon`: 托盘图标路径
+  - 示例：`--system-tray-icon ./assets/tray.png`
+- `--inject`: 注入的 JS 文件路径
+  - 示例：`--inject ./scripts/custom.js`
+- `--proxy-url`: 代理服务器地址
+  - 示例：`--proxy-url http://127.0.0.1:8080`
+- `--targets`: Linux 打包格式（deb/appimage/all）
+  - 示例：`--targets deb` 或 `--targets "deb,appimage"`
+- `--installer-language`: Windows 安装程序语言（默认 en-US）
+  - 示例：`--installer-language zh-CN`（中文安装程序）
+
+更多高级用法请参考 [Wiki 文档](https://github.com/tw93/Pake/wiki)
+
+## 技术架构
+
+**核心技术栈**：
+- **前端**：TypeScript + CLI 工具
+- **后端**：Rust + Tauri 框架
+- **打包**：支持 macOS、Windows、Linux 多平台
+
+**主要组件**：
+- `bin/` - CLI 工具和构建器
+- `src-tauri/` - Rust 核心逻辑
+- 支持插件：窗口状态、单实例、OAuth、HTTP、Shell、通知等
