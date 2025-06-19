@@ -1,7 +1,7 @@
 {
-    "productName": "YTAdminUAT",
-    "identifier": "com.pake.75f8c4",
-    "version": "1.0.1",
+    "productName": "YTAdmin",
+    "identifier": "com.pake.8e6548",
+    "version": "1.1.2",
     "app": {
         "withGlobalTauri": true
     },

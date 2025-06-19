@@ -30,11 +30,11 @@ var bin = {
 };
 var repository = {
 	type: "git",
-	url: "https://github.com/tw93/pake.git"
+	url: "https://github.com/WhiteLeee/Pake.git"
 };
 var author = {
-	name: "Tw93",
-	email: "tw93@qq.com"
+	name: "Wick",
+	email: "acjoke@outlook.com"
 };
 var keywords = [
 	"pake",

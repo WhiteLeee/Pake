@@ -1,7 +1,7 @@
 {
     "windows": [
         {
-            "url": "http://192.168.110.124:18080/",
+            "url": "https://yt.yitongweb.com",
             "url_type": "web",
             "hide_title_bar": false,
             "fullscreen": false,
@@ -24,7 +24,7 @@
         "linux": true,
         "windows": true
     },
-    "system_tray_path": "png/ytadminuat.png",
+    "system_tray_path": "png/ytadmin.png",
     "inject": [],
     "proxy_url": ""
 }

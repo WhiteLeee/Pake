@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 版本信息
     const versionInfo = document.createElement('span');
     versionInfo.id = 'pake-version';
-    versionInfo.textContent = 'YTAdminUAT v1.0.0';
+    versionInfo.textContent = 'YTAdmin v1.0.0'; // 默认版本，将被动态更新
     versionInfo.style.cssText = `
       margin-right: 20px;
       padding: 4px 8px;
@@ -35,6 +35,18 @@ document.addEventListener('DOMContentLoaded', function() {
       cursor: pointer;
       transition: background 0.3s ease;
     `;
+
+    // 动态获取并设置版本信息
+    if (window.__TAURI__ && window.__TAURI__.core) {
+      window.__TAURI__.core.invoke('get_app_info')
+        .then(appInfo => {
+          versionInfo.textContent = `${appInfo.product_name} v${appInfo.version}`;
+        })
+        .catch(err => {
+          console.warn('无法获取应用信息:', err);
+          versionInfo.textContent = 'NaN v1.0.0';
+        });
+    }
 
     // 使用日志监控组件的版本点击监听器
     if (window.LogMonitor) {
@@ -240,7 +252,7 @@ document.addEventListener('DOMContentLoaded', function() {
           method: 'GET',
           headers: {
             'Accept': 'application/json',
-            'User-Agent': 'YTAdminUAT/1.0.0'
+            'User-Agent': 'Chrome/108.0.0.0'
           },
           signal: controller.signal,
           cache: 'no-cache'
@@ -530,6 +542,24 @@ function showLogWindow() {
     align-items: center;
     gap: 10px;
   `;
+  // 上传日志按钮
+  const uploadBtn = document.createElement('button');
+  uploadBtn.textContent = '上传日志';
+  uploadBtn.style.cssText = `
+    background: rgba(76, 175, 80, 0.8);
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background 0.3s ease;
+    margin-right: 8px;
+  `;
+
+  uploadBtn.addEventListener('click', async () => {
+    await uploadLogs();
+  });
 
   // 清空日志按钮
   const clearBtn = document.createElement('button');
@@ -572,6 +602,7 @@ function showLogWindow() {
     logWindow.remove();
   });
 
+  controlGroup.appendChild(uploadBtn);
   controlGroup.appendChild(clearBtn);
   controlGroup.appendChild(closeBtn);
   titleBar.appendChild(title);
@@ -802,6 +833,126 @@ function clearLogs() {
   }
 }
 
+// 显示上传状态
+function showUploadStatus(message, isComplete, isError = false) {
+  console.log(`[上传状态] ${message}`);
+
+  // 查找上传按钮
+  let uploadBtn = null;
+  const buttons = document.querySelectorAll('button');
+  for (let btn of buttons) {
+    if (btn.textContent.includes('上传日志')) {
+      uploadBtn = btn;
+      break;
+    }
+  }
+
+  if (uploadBtn) {
+    const originalText = uploadBtn.getAttribute('data-original-text') || uploadBtn.textContent;
+    if (!uploadBtn.getAttribute('data-original-text')) {
+      uploadBtn.setAttribute('data-original-text', originalText);
+    }
+
+    if (isComplete) {
+      uploadBtn.textContent = message;
+      uploadBtn.style.background = isError ? 'rgba(244, 67, 54, 0.8)' : 'rgba(76, 175, 80, 0.8)';
+      uploadBtn.disabled = false;
+
+      // 3秒后恢复原始状态
+      setTimeout(() => {
+        uploadBtn.textContent = originalText;
+        uploadBtn.style.background = 'rgba(76, 175, 80, 0.8)';
+      }, 3000);
+    } else {
+      uploadBtn.textContent = message;
+      uploadBtn.style.background = 'rgba(255, 193, 7, 0.8)';
+      uploadBtn.disabled = true;
+    }
+  }
+
+  // 同时在控制台显示状态
+  if (isError) {
+    addAppLog('error', message);
+  } else {
+    addAppLog('info', message);
+  }
+}
+
+// 上传日志功能
+async function uploadLogs() {
+  showUploadStatus('开始上传...', false);
+
+  // 检查全局变量是否存在
+  if (typeof appLogs === 'undefined' || typeof networkLogs === 'undefined') {
+    console.error('日志数组未初始化');
+    showUploadStatus('上传失败: 日志数组未初始化', true, true);
+    return;
+  }
+
+  // 收集日志数据
+  const runtimeLogs = appLogs.map(log => typeof log.message === 'string' ? log.message : JSON.stringify(log.message));
+  const xhrLogs = networkLogs.map(log =>
+    `[${log.timestamp}] ${log.method} ${log.url} - Status: ${log.status} - Duration: ${log.duration}ms`
+  );
+
+  try {
+    showUploadStatus('正在准备上传...', false);
+
+    // 检查 Tauri API 是否可用
+    if (!window.__TAURI__ || !window.__TAURI__.core || !window.__TAURI__.core.invoke) {
+      // 重置上传按钮
+      resetUploadBtn();
+      throw new Error('Tauri API 未加载或不可用');
+    }
+
+    // 调用 Rust 后端处理上传
+    const { invoke } = window.__TAURI__.core;
+    const result = await invoke('handle_log_upload', {
+      logs: {
+        runtime: runtimeLogs,
+        xhr: xhrLogs
+      }
+    });
+
+    // 显示详细的成功信息
+    showUploadStatus(result || '日志上传成功!', true, false);
+
+    // 重置上传按钮
+    resetUploadBtn();
+    console.log('上传成功:', result);
+  } catch (error) {
+    console.error('上传日志详细错误:', {
+      message: error.message,
+      stack: error.stack,
+      type: typeof error,
+      error: error
+    });
+    const errorMessage = typeof error === 'string' ? error : (error.message || '未知错误');
+    showUploadStatus(`上传失败: ${errorMessage}`, true, true);
+    // 重置上传按钮
+    resetUploadBtn();
+  }
+}
+
+// 重置上传按钮
+function resetUploadBtn() {
+  const uploadBtn = document.querySelector('button[data-original-text]');
+  if (uploadBtn) {
+    uploadBtn.textContent = uploadBtn.getAttribute('data-original-text') || '上传日志';
+    uploadBtn.style.cssText = `
+      background: rgba(76, 175, 80, 0.8);
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background 0.3s ease;
+      margin-right: 8px;
+    `;
+    uploadBtn.disabled = false;
+  }
+}
 // 添加应用日志
 function addAppLog(level, message) {
   const log = {
