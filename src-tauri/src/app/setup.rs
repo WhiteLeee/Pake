@@ -97,6 +97,8 @@ pub fn set_system_tray(app: &AppHandle, show_system_tray: bool, pake_config: &Pa
             }
             "quit" => {
                 app.save_window_state(StateFlags::all()).unwrap();
+                // 在退出前清理webview缓存
+                crate::clear_webview_data(app);
                 std::process::exit(0);
             }
             _ => (),

@@ -235,22 +235,98 @@ pub fn run_app() {
             Ok(())
         })
         .on_window_event(|_window, _event| {
-            #[cfg(target_os = "macos")]
-            if let tauri::WindowEvent::CloseRequested { api, .. } = _event {
-                let window = _window.clone();
-                tauri::async_runtime::spawn(async move {
-                    if window.is_fullscreen().unwrap_or(false) {
-                        window.set_fullscreen(false).unwrap();
-                        tokio::time::sleep(Duration::from_millis(900)).await;
+            match _event {
+                tauri::WindowEvent::CloseRequested { api, .. } => {
+                    #[cfg(target_os = "macos")]
+                    {
+                        let window = _window.clone();
+                        tauri::async_runtime::spawn(async move {
+                            if window.is_fullscreen().unwrap_or(false) {
+                                window.set_fullscreen(false).unwrap();
+                                tokio::time::sleep(Duration::from_millis(900)).await;
+                            }
+                            window.minimize().unwrap();
+                            window.hide().unwrap();
+                        });
+                        api.prevent_close();
                     }
-                    window.minimize().unwrap();
-                    window.hide().unwrap();
-                });
-                api.prevent_close();
+                    
+                    #[cfg(not(target_os = "macos"))]
+                    {
+                        // 在非macOS平台上，窗口关闭即应用退出，清理webview缓存
+                        clear_webview_data(_window.app_handle());
+                    }
+                }
+                tauri::WindowEvent::Destroyed => {
+                    // 在所有平台上处理窗口销毁时清理webview缓存
+                    // 这确保了即使在macOS上通过其他方式退出应用时也会清理缓存
+                    clear_webview_data(_window.app_handle());
+                }
+                _ => {}
             }
         })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
+}
+
+// 清理webview数据的函数
+pub fn clear_webview_data(app_handle: &tauri::AppHandle) {
+    use std::fs;
+    
+    let app_identifier = app_handle.config().identifier.clone();
+    
+    // 获取webview数据存储路径
+    let webview_data_paths = get_webview_data_paths(app_handle, &app_identifier);
+    
+    for path in webview_data_paths {
+        if path.exists() {
+            match fs::remove_dir_all(&path) {
+                Ok(_) => {
+                    app::invoke::add_log_entry("INFO", &format!("已清理webview缓存: {:?}", path));
+                }
+                Err(e) => {
+                    app::invoke::add_log_entry("ERROR", &format!("清理webview缓存失败: {:?}, 错误: {}", path, e));
+                }
+            }
+        }
+    }
+}
+
+// 获取不同平台的webview数据存储路径
+fn get_webview_data_paths(_app_handle: &tauri::AppHandle, app_identifier: &str) -> Vec<std::path::PathBuf> {
+    let mut paths = Vec::new();
+    
+    #[cfg(target_os = "macos")]
+    {
+        // macOS: ~/Library/WebKit/{app_identifier}
+        if let Some(home_dir) = dirs::home_dir() {
+            paths.push(home_dir.join("Library").join("WebKit").join(app_identifier));
+            paths.push(home_dir.join("Library").join("HTTPStorages").join(app_identifier));
+            paths.push(home_dir.join("Library").join("Caches").join(app_identifier));
+        }
+    }
+    
+    #[cfg(target_os = "windows")]
+    {
+        // Windows: %LOCALAPPDATA%/{app_identifier}/EBWebView
+        if let Ok(local_data_dir) = _app_handle.path().app_local_data_dir() {
+            paths.push(local_data_dir.join("EBWebView"));
+        }
+    }
+    
+    #[cfg(target_os = "linux")]
+    {
+        // Linux: ~/.local/share/{app_identifier}
+        if let Ok(local_data_dir) = _app_handle.path().app_local_data_dir() {
+            paths.push(local_data_dir);
+        }
+        // 也清理可能的缓存目录
+        if let Some(home_dir) = dirs::home_dir() {
+            paths.push(home_dir.join(".cache").join(app_identifier));
+        }
+    }
+    
+    paths
 }
 
 pub fn run() {
