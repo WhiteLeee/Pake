@@ -212,7 +212,11 @@ export async function mergeConfig(url: string, options: PakeAppOptions, tauriCon
     await combineFiles(files, injectFilePath);
   } else {
     tauriConf.pake.inject = [];
-    await fsExtra.writeFile(injectFilePath, '');
+    // 只有当custom.js文件不存在时才创建空文件，避免覆盖现有内容
+    const exists = await fsExtra.pathExists(injectFilePath);
+    if (!exists) {
+      await fsExtra.writeFile(injectFilePath, '');
+    }
   }
   tauriConf.pake.proxy_url = proxyUrl || '';
 
