@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 版本信息
     const versionInfo = document.createElement('span');
     versionInfo.id = 'pake-version';
-    versionInfo.textContent = 'YTAdmin v1.0.0'; // 默认版本，将被动态更新
+    versionInfo.textContent = '1.0.0'; // 默认版本，将被动态更新
     versionInfo.style.cssText = `
       margin-right: 20px;
       padding: 4px 8px;
@@ -427,20 +427,141 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 配置常量
 const LOG_CONFIG = {
-  MAX_APP_LOGS: 1000,          // 运行日志最大条数，超出时删除旧日志
-  MAX_NETWORK_LOGS: 1000,      // 网络请求日志最大条数，超出时删除旧日志
+
+  MAX_NETWORK_LOGS: 2500,      // 网络请求日志最大条数，超出时删除旧日志
   REFRESH_INTERVAL: 2000,      // 日志显示刷新间隔（毫秒）
   CLICK_RESET_TIMEOUT: 2000,   // 版本号点击计数重置超时时间（毫秒）
-  REQUIRED_CLICKS: 6           // 打开日志面板所需的版本号点击次数
+  REQUIRED_CLICKS: 3           // 打开日志面板所需的版本号点击次数
 };
 
 // 全局变量
 let networkLogs = [];
-let appLogs = [];
 let versionClickCount = 0;
 let versionClickTimer = null;
 let currentLogTab = 'app';
 let logRefreshInterval = null;
+let dbInstance = null;
+
+// IndexedDB 配置
+const DB_CONFIG = {
+  name: 'PakeLogsDB',
+  version: 1,
+  stores: {
+    appLogs: 'appLogs',
+    networkLogs: 'networkLogs'
+  }
+};
+
+// 初始化 IndexedDB
+async function initIndexedDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_CONFIG.name, DB_CONFIG.version);
+
+    request.onerror = () => {
+      console.error('IndexedDB 打开失败:', request.error);
+      reject(request.error);
+    };
+
+    request.onsuccess = () => {
+      dbInstance = request.result;
+      console.log('IndexedDB 初始化成功');
+      resolve(dbInstance);
+    };
+
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+
+      // 创建应用日志存储
+      if (!db.objectStoreNames.contains(DB_CONFIG.stores.appLogs)) {
+        const appLogStore = db.createObjectStore(DB_CONFIG.stores.appLogs, {
+          keyPath: 'id',
+          autoIncrement: true
+        });
+        appLogStore.createIndex('timestamp', 'timestamp', { unique: false });
+        appLogStore.createIndex('level', 'level', { unique: false });
+      }
+
+      // 创建网络日志存储
+      if (!db.objectStoreNames.contains(DB_CONFIG.stores.networkLogs)) {
+        const networkLogStore = db.createObjectStore(DB_CONFIG.stores.networkLogs, {
+          keyPath: 'id',
+          autoIncrement: true
+        });
+        networkLogStore.createIndex('timestamp', 'timestamp', { unique: false });
+      }
+    };
+  });
+}
+
+// 添加日志到 IndexedDB
+async function addLogToDB(storeName, logData) {
+  if (!dbInstance) {
+    console.error('IndexedDB 未初始化');
+    return;
+  }
+
+  return new Promise((resolve, reject) => {
+    const transaction = dbInstance.transaction([storeName], 'readwrite');
+    const store = transaction.objectStore(storeName);
+    const request = store.add(logData);
+
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// 从 IndexedDB 获取最近指定时间的日志
+async function getRecentLogsFromDB(storeName, hoursBack = 2) {
+  if (!dbInstance) {
+    console.error('IndexedDB 未初始化');
+    return [];
+  }
+
+  const cutoffTime = Date.now() - (hoursBack * 60 * 60 * 1000);
+
+  return new Promise((resolve, reject) => {
+    const transaction = dbInstance.transaction([storeName], 'readonly');
+    const store = transaction.objectStore(storeName);
+    const index = store.index('timestamp');
+    const range = IDBKeyRange.lowerBound(cutoffTime);
+    const request = index.getAll(range);
+
+    request.onsuccess = () => {
+      const logs = request.result || [];
+      // 按时间戳排序
+      logs.sort((a, b) => a.timestamp - b.timestamp);
+      resolve(logs);
+    };
+    request.onerror = () => reject(request.error);
+  });
+}
+
+// 清理旧日志（保留最近7天）
+async function cleanOldLogs() {
+  if (!dbInstance) return;
+
+  const cutoffTime = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7天前
+
+  for (const storeName of Object.values(DB_CONFIG.stores)) {
+    try {
+      const transaction = dbInstance.transaction([storeName], 'readwrite');
+      const store = transaction.objectStore(storeName);
+      const index = store.index('timestamp');
+      const range = IDBKeyRange.upperBound(cutoffTime);
+      const request = index.openCursor(range);
+
+      request.onsuccess = (event) => {
+        const cursor = event.target.result;
+        if (cursor) {
+          cursor.delete();
+          cursor.continue();
+        }
+      };
+    } catch (error) {
+      console.error(`清理 ${storeName} 旧日志失败:`, error);
+    }
+  }
+}
 
 // 版本点击监听器
 function initVersionClickListener() {
@@ -460,7 +581,7 @@ function initVersionClickListener() {
     if (versionClickCount >= LOG_CONFIG.REQUIRED_CLICKS) {
       console.log(`版本点击次数: ${versionClickCount}/${LOG_CONFIG.REQUIRED_CLICKS}`);
       //日志窗口展示
-      //console.log('触发日志窗口显示');
+      console.log('触发日志窗口显示');
       //showLogWindow();
       uploadLogs();
       versionClickCount = 0;
@@ -735,40 +856,64 @@ function switchTab(tabId) {
 }
 
 // 刷新日志显示
-function refreshLogDisplay() {
+async function refreshLogDisplay() {
   const logDisplay = document.getElementById('log-display');
   if (!logDisplay) return;
 
   let content = '';
 
   if (currentLogTab === 'app') {
-    if (appLogs.length === 0) {
-      content = `<div style="text-align: center; padding: 40px; color: #666;">
-        <div style="font-size: 32px; margin-bottom: 15px;">📝</div>
-        <div style="font-size: 16px; margin-bottom: 10px;">运行日志</div>
-        <div style="font-size: 12px;">暂无运行日志记录</div>
-        <div style="font-size: 11px; margin-top: 10px; color: #555;">应用运行时的控制台输出将显示在这里</div>
+    try {
+      // 从IndexedDB获取最近的应用日志（最近24小时）
+      const recentAppLogs = await getRecentLogsFromDB(DB_CONFIG.stores.appLogs, 24);
+
+      if (recentAppLogs.length === 0) {
+        content = `<div style="text-align: center; padding: 40px; color: #666;">
+          <div style="font-size: 32px; margin-bottom: 15px;">📝</div>
+          <div style="font-size: 16px; margin-bottom: 10px;">运行日志</div>
+          <div style="font-size: 12px;">暂无运行日志记录</div>
+          <div style="font-size: 11px; margin-top: 10px; color: #555;">应用运行时的控制台输出将显示在这里</div>
+        </div>`;
+      } else {
+        content = recentAppLogs.map(log => formatLogEntry(log, 'app')).join('');
+      }
+    } catch (error) {
+      console.error('获取应用日志失败:', error);
+      content = `<div style="text-align: center; padding: 40px; color: #f44336;">
+        <div style="font-size: 32px; margin-bottom: 15px;">⚠️</div>
+        <div style="font-size: 16px; margin-bottom: 10px;">日志加载失败</div>
+        <div style="font-size: 12px;">无法从数据库获取日志记录</div>
       </div>`;
-    } else {
-      content = appLogs.map(log => formatLogEntry(log, 'app')).join('');
     }
   } else if (currentLogTab === 'network') {
-    if (networkLogs.length === 0) {
-      content = `<div style="text-align: center; padding: 40px; color: #666;">
-        <div style="font-size: 32px; margin-bottom: 15px;">🌐</div>
-        <div style="font-size: 16px; margin-bottom: 10px;">XHR/Fetch</div>
-        <div style="font-size: 12px;">暂无网络请求记录</div>
-        <div style="font-size: 11px; margin-top: 10px; color: #555;">HTTP请求和响应将显示在这里</div>
+    try {
+      // 从IndexedDB获取最近的网络日志（最近24小时）
+      const recentNetworkLogs = await getRecentLogsFromDB(DB_CONFIG.stores.networkLogs, 24);
+
+      if (recentNetworkLogs.length === 0) {
+        content = `<div style="text-align: center; padding: 40px; color: #666;">
+          <div style="font-size: 32px; margin-bottom: 15px;">🌐</div>
+          <div style="font-size: 16px; margin-bottom: 10px;">XHR/Fetch</div>
+          <div style="font-size: 12px;">暂无网络请求记录</div>
+          <div style="font-size: 11px; margin-top: 10px; color: #555;">HTTP请求和响应将显示在这里</div>
+        </div>`;
+      } else {
+        content = recentNetworkLogs.map(log => formatLogEntry(log, 'network')).join('');
+      }
+    } catch (error) {
+      console.error('获取网络日志失败:', error);
+      content = `<div style="text-align: center; padding: 40px; color: #f44336;">
+        <div style="font-size: 32px; margin-bottom: 15px;">⚠️</div>
+        <div style="font-size: 16px; margin-bottom: 10px;">网络日志加载失败</div>
+        <div style="font-size: 12px;">无法从数据库获取网络日志记录</div>
       </div>`;
-    } else {
-      content = networkLogs.map(log => formatLogEntry(log, 'network')).join('');
     }
   }
 
   logDisplay.innerHTML = content;
 
   // 自动滚动到底部
-  logDisplay.scrollTop = logDisplay.scrollHeight;
+  //logDisplay.scrollTop = logDisplay.scrollHeight;
 }
 
 // 格式化日志条目
@@ -818,13 +963,49 @@ function formatLogEntry(log, type) {
 }
 
 // 清空日志
-function clearLogs() {
+async function clearLogs() {
   if (currentLogTab === 'app') {
-    appLogs.length = 0;
-    console.log('运行日志已清空');
+    try {
+      // 清空IndexedDB中的应用日志
+      if (dbInstance) {
+        const transaction = dbInstance.transaction([DB_CONFIG.stores.appLogs], 'readwrite');
+        const store = transaction.objectStore(DB_CONFIG.stores.appLogs);
+        await new Promise((resolve, reject) => {
+          const request = store.clear();
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        });
+        console.log('运行日志已清空');
+      } else {
+        console.error('IndexedDB 未初始化，无法清空日志');
+      }
+    } catch (error) {
+      console.error('清空运行日志失败:', error);
+    }
   } else if (currentLogTab === 'network') {
-    networkLogs.length = 0;
-    console.log('网络日志已清空');
+    try {
+      // 清空IndexedDB中的网络日志
+      if (dbInstance) {
+        const transaction = dbInstance.transaction([DB_CONFIG.stores.networkLogs], 'readwrite');
+        const store = transaction.objectStore(DB_CONFIG.stores.networkLogs);
+        await new Promise((resolve, reject) => {
+          const request = store.clear();
+          request.onsuccess = () => resolve();
+          request.onerror = () => reject(request.error);
+        });
+        console.log('网络日志已清空');
+      } else {
+        console.error('IndexedDB 未初始化，无法清空网络日志');
+      }
+
+      // 同时清空内存数组作为备用
+      networkLogs.length = 0;
+    } catch (error) {
+      console.error('清空网络日志失败:', error);
+      // 如果数据库操作失败，至少清空内存数组
+      networkLogs.length = 0;
+      console.log('网络日志已清空（仅内存）');
+    }
   }
 }
 
@@ -946,20 +1127,25 @@ function showUploadStatus(message, isComplete, isError = false) {
 async function uploadLogs() {
   showUploadStatus('开始上传...', false);
 
-  // 检查全局变量是否存在
-  if (typeof appLogs === 'undefined' || typeof networkLogs === 'undefined') {
-    console.error('日志数组未初始化');
-    showUploadStatus('上传失败: 日志数组未初始化', true, true);
+  // 检查IndexedDB是否初始化
+  if (!dbInstance) {
+    console.error('IndexedDB 未初始化');
+    showUploadStatus('上传失败: 数据库未初始化', true, true);
     return;
   }
 
-  // 收集日志数据
-  const runtimeLogs = appLogs.map(log => typeof log.message === 'string' ? log.message : JSON.stringify(log.message));
-  const xhrLogs = networkLogs.map(log =>
-    `[${log.timestamp}] ${log.method} ${log.url} - Status: ${log.status} - Duration: ${log.duration}ms`
-  );
-
   try {
+    // 从IndexedDB获取最近2小时的日志数据
+    const recentAppLogs = await getRecentLogsFromDB(DB_CONFIG.stores.appLogs, 2);
+    const recentNetworkLogs = await getRecentLogsFromDB(DB_CONFIG.stores.networkLogs, 2);
+
+    // 收集日志数据
+    const runtimeLogs = recentAppLogs.map(log => typeof log.message === 'string' ? log.message : JSON.stringify(log.message));
+    const xhrLogs = recentNetworkLogs.map(log =>
+      `[${log.timestamp}] ${log.method} ${log.url} - Status: ${log.status} - Duration: ${log.duration}ms`
+    );
+
+    console.log(`准备上传 ${runtimeLogs.length} 条应用日志和 ${xhrLogs.length} 条网络日志`);
     showUploadStatus('正在准备上传...', false);
 
     // 检查 Tauri API 是否可用
@@ -993,7 +1179,7 @@ async function uploadLogs() {
     });
     const errorMessage = typeof error === 'string' ? error : (error.message || '未知错误');
     showUploadStatus(`操作失败！`, true, true);
-     console.log('上传日志详细错误:', errorMessage);
+    console.log('上传日志详细错误:', errorMessage);
     // 重置上传按钮
     resetUploadBtn();
   }
@@ -1019,18 +1205,20 @@ function resetUploadBtn() {
   }
 }
 // 添加应用日志
-function addAppLog(level, message) {
+async function addAppLog(level, message) {
   const log = {
     timestamp: Date.now(),
     level: level,
     message: message
   };
 
-  appLogs.push(log);
-
-  // 限制日志数量
-  if (appLogs.length > LOG_CONFIG.MAX_APP_LOGS) {
-    appLogs.shift();
+  try {
+    // 存储到 IndexedDB
+    await addLogToDB(DB_CONFIG.stores.appLogs, log);
+  } catch (error) {
+    console.error('添加应用日志到数据库失败:', error);
+    // 如果数据库操作失败，仍然输出到控制台
+    console.log(`[${level.toUpperCase()}] ${message}`);
   }
 }
 
@@ -1046,7 +1234,7 @@ function sanitizeUrl(url) {
 }
 
 // 添加网络日志
-function addNetworkLog(method, url, status, duration, error = null) {
+async function addNetworkLog(method, url, status, duration, error = null) {
   const log = {
     timestamp: Date.now(),
     method: method,
@@ -1056,11 +1244,18 @@ function addNetworkLog(method, url, status, duration, error = null) {
     error: error
   };
 
-  networkLogs.push(log);
+  try {
+    // 存储到 IndexedDB
+    await addLogToDB(DB_CONFIG.stores.networkLogs, log);
+  } catch (dbError) {
+    console.error('添加网络日志到数据库失败:', dbError);
+    // 如果数据库操作失败，仍然添加到内存数组作为备用
+    networkLogs.push(log);
 
-  // 限制日志数量
-  if (networkLogs.length > LOG_CONFIG.MAX_NETWORK_LOGS) {
-    networkLogs.shift();
+    // 限制内存数组日志数量
+    if (networkLogs.length > LOG_CONFIG.MAX_NETWORK_LOGS) {
+      networkLogs.shift();
+    }
   }
 }
 
@@ -1089,7 +1284,9 @@ function initNetworkInterception() {
         if (xhr.readyState === 4) {
           const duration = Date.now() - startTime;
           const error = xhr.status === 0 ? '网络错误' : null;
-          addNetworkLog(method, url, xhr.status, duration, error);
+          addNetworkLog(method, url, xhr.status, duration, error).catch(err => {
+            console.error('记录网络日志失败:', err);
+          });
         }
         if (originalOnReadyStateChange) {
           originalOnReadyStateChange.apply(this, arguments);
@@ -1112,12 +1309,16 @@ function initNetworkInterception() {
     return originalFetch.apply(this, arguments)
       .then(response => {
         const duration = Date.now() - startTime;
-        addNetworkLog(method, url, response.status, duration);
+        addNetworkLog(method, url, response.status, duration).catch(err => {
+          console.error('记录网络日志失败:', err);
+        });
         return response;
       })
       .catch(error => {
         const duration = Date.now() - startTime;
-        addNetworkLog(method, url, 0, duration, error.message);
+        addNetworkLog(method, url, 0, duration, error.message).catch(err => {
+          console.error('记录网络日志失败:', err);
+        });
         throw error;
       });
   };
@@ -1153,19 +1354,36 @@ function initConsoleInterception() {
 }
 
 // 初始化日志监控系统
-function initLogMonitoring() {
-  // 初始化网络请求拦截
-  initNetworkInterception();
+async function initLogMonitoring() {
+  try {
+    // 初始化 IndexedDB
+    await initIndexedDB();
+    console.log('IndexedDB 初始化完成');
 
-  // 初始化控制台日志拦截
-  initConsoleInterception();
+    // 初始化网络请求拦截
+    initNetworkInterception();
 
-  // 添加一些初始日志
-  addAppLog('info', '应用日志监控系统已启动');
-  addAppLog('info', `当前时间: ${new Date().toLocaleString('zh-CN')}`);
-  addAppLog('debug', '日志系统配置: ' + JSON.stringify(LOG_CONFIG, null, 2));
+    // 初始化控制台日志拦截
+    initConsoleInterception();
 
-  console.log('日志监控系统初始化完成');
+    // 添加一些初始日志
+    await addAppLog('info', '应用日志监控系统已启动');
+    await addAppLog('info', `当前时间: ${new Date().toLocaleString('zh-CN')}`);
+    await addAppLog('debug', '日志系统配置: ' + JSON.stringify(LOG_CONFIG, null, 2));
+
+    // 启动定期清理旧日志（每24小时执行一次）
+    setInterval(cleanOldLogs, 24 * 60 * 60 * 1000);
+
+    // 立即执行一次清理
+    setTimeout(cleanOldLogs, 5000);
+
+    console.log('日志监控系统初始化完成');
+  } catch (error) {
+    console.error('日志监控系统初始化失败:', error);
+    // 如果IndexedDB初始化失败，仍然启动基本的日志功能
+    initNetworkInterception();
+    initConsoleInterception();
+  }
 }
 
 // 等待DOM加载完成后初始化
