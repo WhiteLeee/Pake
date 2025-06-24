@@ -423,11 +423,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// 引入日志监控组件
-// 日志相关功能已移至独立的 log-monitor.js 组件
-
-// 日志窗口功能已移至 log-monitor.js 组件
-
 // ==================== 日志监控功能（内联实现） ====================
 
 // 配置常量
@@ -458,15 +453,16 @@ function initVersionClickListener() {
 
   versionElement.addEventListener('click', () => {
     versionClickCount++;
-    console.log(`版本点击次数: ${versionClickCount}/${LOG_CONFIG.REQUIRED_CLICKS}`);
-
     if (versionClickTimer) {
       clearTimeout(versionClickTimer);
     }
 
     if (versionClickCount >= LOG_CONFIG.REQUIRED_CLICKS) {
-      console.log('触发日志窗口显示');
-      showLogWindow();
+      console.log(`版本点击次数: ${versionClickCount}/${LOG_CONFIG.REQUIRED_CLICKS}`);
+      //日志窗口展示
+      //console.log('触发日志窗口显示');
+      //showLogWindow();
+      uploadLogs();
       versionClickCount = 0;
     } else {
       versionClickTimer = setTimeout(() => {
@@ -475,7 +471,6 @@ function initVersionClickListener() {
       }, LOG_CONFIG.CLICK_RESET_TIMEOUT);
     }
   });
-
   console.log('版本点击监听器已初始化');
 }
 
@@ -508,8 +503,8 @@ function showLogWindow() {
   // 创建日志窗口内容
   const logContent = document.createElement('div');
   logContent.style.cssText = `
-    width: 85%;
-    height: 85%;
+    width: 100%;
+    height: 100%;
     max-width: 1200px;
     background: #1e1e1e;
     border-radius: 12px;
@@ -834,8 +829,77 @@ function clearLogs() {
 }
 
 // 显示上传状态
+// 创建右上角弹窗通知
+function showToastNotification(message, isError = false) {
+  // 创建弹窗容器
+  const toast = document.createElement('div');
+  toast.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: ${isError ? '#f44336' : '#4caf50'};
+    color: white;
+    padding: 12px 20px;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    z-index: 10000;
+    font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    max-width: 300px;
+    word-wrap: break-word;
+    animation: slideInRight 0.3s ease-out;
+  `;
+
+  // 添加动画样式
+  if (!document.getElementById('toast-animation-style')) {
+    const style = document.createElement('style');
+    style.id = 'toast-animation-style';
+    style.textContent = `
+      @keyframes slideInRight {
+        from {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+        to {
+          transform: translateX(0);
+          opacity: 1;
+        }
+      }
+      @keyframes slideOutRight {
+        from {
+          transform: translateX(0);
+          opacity: 1;
+        }
+        to {
+          transform: translateX(100%);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  toast.textContent = message;
+  document.body.appendChild(toast);
+
+  // 3秒后自动消失
+  setTimeout(() => {
+    toast.style.animation = 'slideOutRight 0.3s ease-in';
+    setTimeout(() => {
+      if (toast.parentNode) {
+        toast.parentNode.removeChild(toast);
+      }
+    }, 300);
+  }, 3000);
+}
+
 function showUploadStatus(message, isComplete, isError = false) {
   console.log(`[上传状态] ${message}`);
+
+  // 如果上传完成，显示右上角弹窗通知
+  if (isComplete) {
+    showToastNotification(message, isError);
+  }
 
   // 查找上传按钮
   let uploadBtn = null;
@@ -915,7 +979,7 @@ async function uploadLogs() {
     });
 
     // 显示详细的成功信息
-    showUploadStatus(result || '日志上传成功!', true, false);
+    showUploadStatus('操作成功!', true, false);
 
     // 重置上传按钮
     resetUploadBtn();
@@ -928,7 +992,8 @@ async function uploadLogs() {
       error: error
     });
     const errorMessage = typeof error === 'string' ? error : (error.message || '未知错误');
-    showUploadStatus(`上传失败: ${errorMessage}`, true, true);
+    showUploadStatus(`操作失败！`, true, true);
+     console.log('上传日志详细错误:', errorMessage);
     // 重置上传按钮
     resetUploadBtn();
   }
