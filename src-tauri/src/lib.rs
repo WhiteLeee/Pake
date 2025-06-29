@@ -254,6 +254,7 @@ pub fn run_app() {
                     #[cfg(not(target_os = "macos"))]
                     {
                         // 在非macOS平台上，窗口关闭即应用退出，清理webview缓存
+                        let _ = api; // 显式使用api变量以避免警告
                         clear_webview_data(_window.app_handle());
                     }
                 }
@@ -293,16 +294,16 @@ pub fn clear_webview_data(app_handle: &tauri::AppHandle) {
 }
 
 // 获取不同平台的webview数据存储路径
-fn get_webview_data_paths(_app_handle: &tauri::AppHandle, app_identifier: &str) -> Vec<std::path::PathBuf> {
+fn get_webview_data_paths(_app_handle: &tauri::AppHandle, _app_identifier: &str) -> Vec<std::path::PathBuf> {
     let mut paths = Vec::new();
     
     #[cfg(target_os = "macos")]
     {
         // macOS: ~/Library/WebKit/{app_identifier}
         if let Some(home_dir) = dirs::home_dir() {
-            paths.push(home_dir.join("Library").join("WebKit").join(app_identifier));
-            paths.push(home_dir.join("Library").join("HTTPStorages").join(app_identifier));
-            paths.push(home_dir.join("Library").join("Caches").join(app_identifier));
+            paths.push(home_dir.join("Library").join("WebKit").join(_app_identifier));
+            paths.push(home_dir.join("Library").join("HTTPStorages").join(_app_identifier));
+            paths.push(home_dir.join("Library").join("Caches").join(_app_identifier));
         }
     }
     
@@ -322,7 +323,7 @@ fn get_webview_data_paths(_app_handle: &tauri::AppHandle, app_identifier: &str) 
         }
         // 也清理可能的缓存目录
         if let Some(home_dir) = dirs::home_dir() {
-            paths.push(home_dir.join(".cache").join(app_identifier));
+            paths.push(home_dir.join(".cache").join(_app_identifier));
         }
     }
     
